@@ -45,7 +45,11 @@ const createProduct = async (req,res)=>{
 // get all product 
 const getAllProduct = async(req,res)=>{
     try{
-        const product = await Product.find().populate('category');
+        let filter= {};
+        if(req.query.categories){
+            filter= {category: req.query.categories.split(',')};
+        }
+        const product = await Product.find(filter).populate('category');
         if(!product){
             res.status(400).json({
                 mgs: "no product"
@@ -58,7 +62,7 @@ const getAllProduct = async(req,res)=>{
         }
     }
     catch(err){
-        console.log(err);
+        res.send(err);
     }
 }
 
@@ -117,8 +121,63 @@ const productUpdate = async(req,res)=>{
     catch(err){
         res.send(err )
     }
+}
+
+
+const productDelete = async(req,res)=>{
+    try{
+        const data =await Product.findByIdAndDelete(req.params.id);
+        if(!data){
+            return res.status(400).json({
+                success: false,
+                mgs: "Product is not  find to delete!"
+            })
+        }
+        res.status(200).json({
+            success: true,
+            mgs: "Product is deleted!",
+        })
+    }
+    catch(err){
+        res.send(err);
+    }
+}
+
+const countProduct = async(req,res)=>{
+    try{
+        const productCount = await Product.countDocuments();
+        if(!productCount){
+            res.status(500).json({
+                "productCount" : 0
+            })
+        }
+        return res.json({
+            "productCount": productCount
+        })
         
-    
+    }
+    catch(err){
+        res.send(err.message);
+    }
+}
+
+const isFeaturedProduct = async(req,res)=>{
+    try{
+        const count = req.params.count? req.params.count:0;
+        const product = await Product.find({isFeatured:true}).limit(+count);
+        if(!product){
+            return res.status(500).json({
+                mgs: "product is not fount!"
+            })
+        }
+        return res.status(200).json({
+            product
+        })
+
+    }
+    catch(err){
+        res.send(err.message);
+    }
 }
 
 
@@ -126,5 +185,8 @@ module.exports={
     createProduct,
     getAllProduct,
     getById,
-    productUpdate
+    productUpdate,
+    productDelete,
+    countProduct,
+    isFeaturedProduct
 }

@@ -11,7 +11,7 @@ const getCat = async(req,res)=>{
         res.send(category);
     }
     catch(err){
-        console.log(err);
+        res.send(err);
     }
 }
 
@@ -24,7 +24,7 @@ const getByIDCat = async(req,res)=>{
         res.send(singleCat);
     }
     catch(err){
-        console.log(err);
+        res.send(err);
     }
 }
 
@@ -43,7 +43,7 @@ const createCat = async(req,res)=>{
 
     }
     catch(err){
-        console.log(err);
+        res.send(err);
     }
 }
 
@@ -64,7 +64,7 @@ const updateCategory = async(req,res)=>{
         res.send(categoryUpdate)
     }
     catch(err){
-        console.log(err);
+        res.send(err);
     }
 }
 
@@ -83,7 +83,7 @@ const catDelete = async(req,res)=>{
         })
     }
     catch(err){
-        console.log(err);
+        res.send(err);
     }
 }
 

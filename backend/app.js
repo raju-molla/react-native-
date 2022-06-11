@@ -5,26 +5,27 @@ const cors = require('cors')
 require('dotenv/config');
 
 
+
 app.use(express.json());
 app.use(cors());
 app.options('*',cors())
+
+
+
 
 const api = process.env.API_URL
 
 // router connection
 const productRouter = require('./routes/products')
 const categoryRouter = require('./routes/category')
+const userRouter = require('./routes/user');
+const OrderRouter = require('./routes/order')
 
 app.use(api+'/product',productRouter)
 app.use(api+'/category',categoryRouter)
+app.use(api+'/user',userRouter)
+app.use(api+'/order',OrderRouter)
 
-
-
-
-
-app.get('/', (req,res)=>{
-    res.send('agfa')
-})
 
 
 // database connections
