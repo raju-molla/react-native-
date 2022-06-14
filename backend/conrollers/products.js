@@ -1,20 +1,35 @@
 const Product = require('../models/productSchema.js');
 const Category = require('../models/category');
 const mongoose = require('mongoose');
+const multer = require('multer')
+
+// for images
+
+
+
+
+
 
 // create a product 
 const createProduct = async (req,res)=>{
     try{
         let data = await Category.findById(req.body.category);
+        
         if(!data){
             return res.status(400).send("invalid")
         }
+        if(!req.file){
+            return res.status(404).json('empty file')
+        }
+        const fileName=  req.file.filename;
+        
 
+        const basePath = `${req.protocol}://${req.get('host')}/public/upload/`;
         let product = new Product({
             name:req.body.name,
             description: req.body.description,
             richDescription:req.body.richDescription,
-            image: req.body.image,
+            image: `${basePath}${fileName}`,
             brand: req.body.brand,
             price: req.body.price,
             category: req.body.category,
@@ -24,6 +39,7 @@ const createProduct = async (req,res)=>{
             isFeatured: req.body.isFeatured,
             
         })
+        
         product = await product.save();
         if(!product){
             return res.status(500).json({
@@ -81,19 +97,34 @@ const getById = async(req,res)=>{
 }
 
 const productUpdate = async(req,res)=>{
-    try{
+    try{ 
         let data = await Category.findById(req.body.category);
         if(!data){
             return res.status(400).send("invalid")
         }
 
-        let product = await Product.findByIdAndUpdate(
+        const product = await Product.findById(req.params.id);
+        if(!product){
+            return res.status(404).json('product is empty')
+        }
+        const file = req.file;
+        let imagePath;
+        if(file){
+            const fileName=  req.file.filename;
+            const basePath = `${req.protocol}://${req.get('host')}/public/upload/`;
+            imagePath=`${basePath}${fileName}`
+        }
+        else{
+            imagePath = product.image
+        }
+
+        let updateProduct = await Product.findByIdAndUpdate(
             req.params.id,
              {
                 name:req.body.name,
                 description: req.body.description,
                 richDescription:req.body.richDescription,
-                image: req.body.image,
+                image: imagePath,
                 brand: req.body.brand,
                 price: req.body.price,
                 category: req.body.category,
@@ -106,20 +137,51 @@ const productUpdate = async(req,res)=>{
             {new:true}
         
         )
-        product = await product.save();
-        if(!product){
+        updateProduct = await product.save();
+        if(!updateProduct){
             return res.status(500).json({
                 mgs: "product is not updated!"
             })
         }
         return res.status(200).json({
             mgs:'product updated successfully',
-            product,
+            updateProduct,
         
         })
     }
     catch(err){
         res.send(err )
+    }
+}
+
+
+const GallaryImages = async(req,res)=>{
+    try{
+    
+        const files = req.files;
+        let imagesPaths = [];
+        const basePath = `${req.protocol}://${req.get('host')}/public/upload/`;
+        
+        if (files) {
+            files.map((file) => {
+                imagesPaths.push(`${basePath}${file.filename}`);
+            });
+        }
+
+        const product = await Product.findByIdAndUpdate(
+            req.params.id,
+            {
+                images: imagesPaths
+            },
+            { new: true }
+        );
+
+        if (!product) return res.status(500).send('the gallery cannot be updated!');
+
+        res.send(product)
+    }
+    catch(err){
+        res.send(err);
     }
 }
 
@@ -188,5 +250,6 @@ module.exports={
     productUpdate,
     productDelete,
     countProduct,
-    isFeaturedProduct
+    isFeaturedProduct,
+    GallaryImages
 }

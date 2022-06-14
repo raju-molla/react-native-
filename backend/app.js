@@ -8,6 +8,7 @@ require('dotenv/config');
 
 app.use(express.json());
 app.use(cors());
+app.use('/public/upload', express.static(__dirname+ '/public/upload/'))
 app.options('*',cors())
 
 
